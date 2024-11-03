@@ -1,0 +1,80 @@
+datasource db {
+  provider = "mysql" // Or "postgresql", depending on your database
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Club {
+  id          Int          @id @default(autoincrement())
+  Name        String       @db.VarChar(30)
+  Incharge    String       @db.VarChar(20)
+  Dept        String       @db.VarChar(10)
+  start_date  DateTime
+
+  // Relations
+  members     Membership[]
+  events      Events[]
+
+  @@map("Club")
+}
+
+model Member {
+  USN         String       @id @db.VarChar(30)
+  first_name  String       @db.VarChar(30)
+  last_name   String       @db.VarChar(30)
+  m_id        Int          @unique @default(autoincrement())
+  P_no        BigInt       @db.BigInt
+  username    String       @unique @db.VarChar(30)
+  password    String       @db.VarChar(255)
+  email       String       @unique @db.VarChar(50)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  // Relations
+  memberships Membership[]
+  registrations Registration[]
+
+  @@map("Member")
+}
+
+model Membership {
+  c_id Int
+  usn  String
+
+  // Relations
+  club   Club   @relation(fields: [c_id], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [usn], references: [USN], onDelete: Cascade)
+
+  @@id([c_id, usn]) // Composite primary key
+  @@map("Membership")
+}
+
+model Events {
+  e_id   Int      @id @default(autoincrement())
+  e_name String   @db.VarChar(30)
+  c_id   Int?
+  date   DateTime
+  venue  String   @db.VarChar(100)
+
+  // Relations
+  club         Club?      @relation(fields: [c_id], references: [id], onDelete: SetNull)
+  registrations Registration[]
+
+  @@map("Events")
+}
+
+model Registration {
+  r_id       Int     @id @default(autoincrement())
+  m_d        Int
+  e_id       Int
+  Attendance Boolean
+
+  // Relations
+  member Member @relation(fields: [m_d], references: [m_id], onDelete: Cascade)
+  event  Events @relation(fields: [e_id], references: [e_id], onDelete: Cascade)
+
+  @@map("Registration")
+}
