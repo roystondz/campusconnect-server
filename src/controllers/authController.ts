@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       },
     });
 
-    res.status(201).json({ success:true}); // Return the created user if necessary
+    res.status(201).json({ success:true,name:user.first_name}); // Return the created user if necessary
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ success:false,error: "Registration failed" });
